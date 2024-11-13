@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <h1>SEAD Data Quality Assurance</h1>
+
+        <div id="upload-panel-container">
+            <div id="source-data-upload-container" class="upload-container">
+                <h2>Source excel</h2>
+                <div id="source-data-upload" class="dropzone">
+                    <div class="dz-message" data-dz-message><span>Drop your own excel of source data here</span></div>
+                </div>
+
+                <div class="worksheet-selector-container">
+                    <label for="worksheet-selector">Select a worksheet:</label>
+                    <select name="worksheet-selector" class="worksheet-selector"></select>
+                </div>
+            </div>
+            
+            <div id="sead-export-upload-container" class="upload-container">
+                <h2>SEAD export excel</h2>
+                <div id="sead-export-upload" class="dropzone">
+                    <div class="dz-message" data-dz-message><span>Drop your export of SEAD datasets here</span></div>
+                </div>
+
+                <div class="worksheet-selector-container">
+                    <label for="worksheet-selector">Select a worksheet:</label>
+                    <select name="worksheet-selector" class="worksheet-selector"></select>
+                </div>
+
+            </div>
+        </div>
+
+        <h2>Column mapping</h2>
+        <div id="column-mapping-container">
+            
+            <div id="source-columns-container">
+                <table id="source-columns-table">
+                    <thead>
+                        <tr>
+                            <th>Column name</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="sead-columns-container">
+                <table id="sead-columns-table">
+                    <thead>
+                        <tr>
+                            <th>Column name</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+
+    </body>
+</html>
