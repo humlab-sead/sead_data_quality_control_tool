@@ -33,3 +33,25 @@ div.dropzone {
     margin-top: 1em;
     visibility: hidden;
 }
+
+#column-mapping-container {
+    position: relative;
+}
+
+.columns-container {
+    position: relative;
+}
+
+.columns-container table {
+    position: relative;
+}
+
+.column-cell:hover {
+    background-color: #f0f0f0;
+    cursor:cell;
+}
+
+.column-cell.selected {
+    background-color: #f00000;
+}
+

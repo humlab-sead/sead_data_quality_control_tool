@@ -2,7 +2,7 @@ import Dropzone from "dropzone";
 import "dropzone/dist/dropzone.css";
 import "../stylesheets/style.scss";
 import exceljs from "exceljs";
-
+import { nanoid } from "nanoid";
 
 class SDQC {
 
@@ -12,7 +12,12 @@ class SDQC {
 
         $(".worksheet-selector").on("change", (evt) => {
             const parent = $(evt.target).closest(".upload-container");
-            this.loadTableColumns($(parent).attr("id"), evt.target.value);
+            const worksheetName = evt.target.value;
+
+            let containerName =parent.attr("id").replace("-container", "");
+            let workbook = this.data[containerName].workbook;
+            
+            this.loadTableColumns(containerName, worksheetName, workbook);
         });
         
         this.autoLoadExampleData();
@@ -104,22 +109,18 @@ class SDQC {
                 }
 
 
-                let selectedWorksheetName = this.getSelectedWorksheet(uploadSource);
+                let selectedWorksheetName = this.getSelectedWorksheetName(uploadSource);
                 this.loadTableColumns(uploadSource, selectedWorksheetName, this.data[uploadSource].workbook);
-
             });
         };
 
         reader.readAsArrayBuffer(file);
     }
 
-    getSelectedWorksheet(uploadSource) {
+    getSelectedWorksheetName(uploadSource) {
         let selectorEl = $("#"+uploadSource+"-container .worksheet-selector");
         let selectedWorksheetName = selectorEl.val();
-        let selectedWorksheet = this.data[uploadSource].worksheets.filter((worksheet) => {
-            return worksheet.name == selectedWorksheetName;
-        })[0];
-        return selectedWorksheet;
+        return selectedWorksheetName;
     }
 
     processExcelWorksheet(containerName, worksheet) {
@@ -161,19 +162,104 @@ class SDQC {
         defaultOption.prop("selected", true);
     }
 
-    loadTableColumns(containerName, selectedWorksheetName, worksheet) {
-        console.log(containerName,  selectedWorksheetName, worksheet);
-        /*
-        $("#"+containerName+" table tbody").empty();
+    loadTableColumns(containerName, selectedWorksheetName, workbook) {
+        const worksheet = workbook.getWorksheet(selectedWorksheetName);
 
-        console.log(this.data)
-        if(this.data[containerName].dataLoaded == false) {
-            this.processExcelWorksheet(containerName, this.data[containerName].worksheet);
-            //this.data[containerName].dataLoaded = true;
+        let tableSelector = "";
+        if(containerName == "source-data-upload") {
+            tableSelector = "#source-columns-table";
+        }
+        else if(containerName == "sead-export-upload") {
+            tableSelector = "#sead-columns-table";
         }
 
-        console.log(this.data)
+        $(tableSelector+" tbody").empty();
+
+        //populate the table with the selected worksheet's header data
+        let headers = [];
+        let rows = [];
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) {
+                // Extract header cells
+                headers = row.values.filter(Boolean); // Remove undefined values
+            } else {
+                // Convert each row to a key-value pair object
+                const rowData = {};
+                row.eachCell((cell, colNumber) => {
+                    rowData[headers[colNumber - 1]] = cell.value;
+                });
+                rows.push(rowData);
+            }
+        });
+
+        this.data[containerName].headers = headers;
+        this.data[containerName].rows = rows;
+
+        let rowIds = [];
+        headers.forEach(headerName => {
+            let rowId = nanoid();
+            $(tableSelector+" tbody").append(`<tr>
+                <td id='`+rowId+`' class='column-cell'>`+headerName+`</td>
+                </tr>`);
+            rowIds.push(rowId);
+        });
+
+        //select 2 random rowIds
+        /*
+        let startRowId = rowIds[Math.floor(Math.random() * rowIds.length)];
+        let endRowId = rowIds[Math.floor(Math.random() * rowIds.length)];
+
+        $("#"+startRowId).css("background-color", "yellow");
+        $("#"+endRowId).css("background-color", "yellow");
         */
+        /*
+        setTimeout(() => {
+            jsPlumb.jsPlumb.connect({
+                source: startRowId,
+                target: endRowId,
+                connector: ["Bezier", { curviness: 50 }],
+                anchors: ["Left", "Right"],
+                paintStyle: { stroke: "blue", strokeWidth: 2 },
+                endpoint: "Dot",
+            });
+        }, 3000);
+        */
+
+
+        $(tableSelector+" .column-cell").on("click", (evt) => {
+            let cell = $(evt.target);
+            let cellId = cell.attr("id");
+
+            if(cell.hasClass("selected")) {
+                cell.removeClass("selected");
+            }
+            else {
+                cell.addClass("selected");
+            }
+
+            let selectedCells = $(".column-cell.selected");
+            if(selectedCells.length == 2) {
+                let startRowId = selectedCells[0].id;
+                let endRowId = selectedCells[1].id;
+
+                /*
+                jsPlumb.jsPlumb.connect({
+                    source: startRowId,
+                    target: endRowId,
+                    connector: ["Bezier", { curviness: 50 }],
+                    anchors: ["Right", "Left"],
+                    paintStyle: { stroke: "blue", strokeWidth: 2 },
+                    endpoint: "Dot",
+                });
+                */
+
+                selectedCells.removeClass("selected");
+            }
+        });
+    }
+
+    getWorksheet(worksheetName, workbook) {
+        return workbook.getWorksheet(worksheetName);
     }
 
 }
