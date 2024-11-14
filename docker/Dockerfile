@@ -12,7 +12,7 @@ RUN apt-get install -y nodejs
 
 WORKDIR /
 
-ADD https://api.github.com/repos/humlab-sead/sead_data_quality_control_tool/git/refs/heads/master version.json
+ADD https://api.github.com/repos/humlab-sead/sead_data_quality_control_tool/git/refs/heads/main version.json
 
 RUN git clone https://github.com/humlab-sead/sead_data_quality_control_tool
 
