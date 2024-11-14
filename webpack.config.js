@@ -17,7 +17,7 @@ module.exports = (env, config) => {
       assetModuleFilename: '[name][ext][query]',
     },
     optimization: {
-      minimize: false,
+      minimize: false, // Disable minification because it breaks exceljs for some reason
     },
     plugins: [
       new HtmlWebpackPlugin({
