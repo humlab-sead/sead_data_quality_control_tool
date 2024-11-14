@@ -20,7 +20,7 @@ class SDQC {
             this.loadTableColumns(containerName, worksheetName, workbook);
         });
         
-        this.autoLoadExampleData();
+        //this.autoLoadExampleData();
     }
 
     autoLoadExampleData() {
@@ -86,28 +86,16 @@ class SDQC {
 
                 //for each worksheet...
                 workbook.eachSheet((worksheet, sheetId) => {
-                    /*
-                    this.data[uploadSource].worksheets.push({
-                        name: worksheet.name,
-                        worksheet: worksheet,
-                        dataLoaded: false,
-                        headers: [],
-                        rows: []
-                    });
-                    */
                     selectorEl.append(
                         $("<option>").text(worksheet.name)
                     );
 
                     $("#"+uploadSource+"-container .worksheet-selector-container").css("visibility", "visible");
-                
-                    
                 });
 
                 if(uploadSource == "source-data-upload") {
                     this.autoSelectDefaultWorksheet(selectorEl);
                 }
-
 
                 let selectedWorksheetName = this.getSelectedWorksheetName(uploadSource);
                 this.loadTableColumns(uploadSource, selectedWorksheetName, this.data[uploadSource].workbook);
@@ -143,13 +131,7 @@ class SDQC {
 
         this.data[containerName].headers = headers;
         this.data[containerName].rows = rows;
-        this.data[containerName].dataLoaded = true;
-
-        console.log(this.data);
-        
-        //console.log(rows);
-
-        
+        this.data[containerName].dataLoaded = true;   
     }
 
     autoSelectDefaultWorksheet(selectorEl) {
@@ -193,42 +175,57 @@ class SDQC {
         });
 
         this.data[containerName].headers = headers;
+        this.data[containerName].headerDomIds = [];
         this.data[containerName].rows = rows;
 
-        let rowIds = [];
         headers.forEach(headerName => {
             let rowId = nanoid();
-            $(tableSelector+" tbody").append(`<tr>
-                <td id='`+rowId+`' class='column-cell'>`+headerName+`</td>
+            $(tableSelector+" tbody").append(`<tr id='`+rowId+`'>
+                <td class='column-cell'>`+headerName+`</td>
                 </tr>`);
-            rowIds.push(rowId);
+                this.data[containerName].headerDomIds.push({
+                    header: headerName,
+                    id: rowId
+                });
         });
 
-        //select 2 random rowIds
-        /*
-        let startRowId = rowIds[Math.floor(Math.random() * rowIds.length)];
-        let endRowId = rowIds[Math.floor(Math.random() * rowIds.length)];
-
-        $("#"+startRowId).css("background-color", "yellow");
-        $("#"+endRowId).css("background-color", "yellow");
-        */
-        /*
-        setTimeout(() => {
-            jsPlumb.jsPlumb.connect({
-                source: startRowId,
-                target: endRowId,
-                connector: ["Bezier", { curviness: 50 }],
-                anchors: ["Left", "Right"],
-                paintStyle: { stroke: "blue", strokeWidth: 2 },
-                endpoint: "Dot",
+        headers.forEach(headerName => {
+            let values = [];
+            let numbersFound = 0;
+            this.data[containerName].rows.forEach(row => {
+                values.push(row[headerName]);
+                if(row[headerName] != "" && !isNaN(row[headerName])) {
+                    numbersFound++;
+                }
             });
-        }, 3000);
-        */
+            
+            if(numbersFound == values.length) {    
 
+                let headerDomId = this.data[containerName].headerDomIds.find((headerDomId) => {
+                    return headerDomId.header == headerName;
+                });
 
+                let checksum = 0;
+                values.forEach(value => {
+                    checksum += parseFloat(value);
+                });
+
+                $("#"+headerDomId.id).append("<td class='checksum'>"+checksum+"</td>");
+            }
+            else {
+                this.computeChecksum(values).then((checksum) => {
+                    //find the row with this headerName
+                    let headerDomId = this.data[containerName].headerDomIds.find((headerDomId) => {
+                        return headerDomId.header == headerName;
+                    });
+    
+                    $("#"+headerDomId.id).append("<td class='checksum'>"+checksum+"</td>");
+                });
+            } 
+        });
+        
         $(tableSelector+" .column-cell").on("click", (evt) => {
             let cell = $(evt.target);
-            let cellId = cell.attr("id");
 
             if(cell.hasClass("selected")) {
                 cell.removeClass("selected");
@@ -238,20 +235,9 @@ class SDQC {
             }
 
             let selectedCells = $(".column-cell.selected");
-            if(selectedCells.length == 2) {
+            if(selectedCells.length == 3) {
                 let startRowId = selectedCells[0].id;
                 let endRowId = selectedCells[1].id;
-
-                /*
-                jsPlumb.jsPlumb.connect({
-                    source: startRowId,
-                    target: endRowId,
-                    connector: ["Bezier", { curviness: 50 }],
-                    anchors: ["Right", "Left"],
-                    paintStyle: { stroke: "blue", strokeWidth: 2 },
-                    endpoint: "Dot",
-                });
-                */
 
                 selectedCells.removeClass("selected");
             }
@@ -260,6 +246,24 @@ class SDQC {
 
     getWorksheet(worksheetName, workbook) {
         return workbook.getWorksheet(worksheetName);
+    }
+
+    async computeChecksum(stringsArray) {
+        // Step 1: Concatenate the array of strings into one string
+        const concatenatedString = stringsArray.join('');
+    
+        // Step 2: Encode the string as a Uint8Array (needed for hashing)
+        const encoder = new TextEncoder();
+        const data = encoder.encode(concatenatedString);
+    
+        // Step 3: Use the Web Crypto API to compute a hash
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data); // You can use 'SHA-1', 'SHA-256', etc.
+    
+        // Step 4: Convert the ArrayBuffer to a hexadecimal string
+        const hashArray = Array.from(new Uint8Array(hashBuffer)); // Convert buffer to byte array
+        const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join(''); // Convert bytes to hex
+    
+        return hashHex;
     }
 
 }
