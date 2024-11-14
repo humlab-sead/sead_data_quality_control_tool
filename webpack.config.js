@@ -1,11 +1,10 @@
 const webpack = require('webpack');
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = (env, config) => {
-
   return {
     entry: {
       main: path.resolve(__dirname, './src/js/main.js'),
@@ -14,12 +13,12 @@ module.exports = (env, config) => {
       path: path.resolve(__dirname, './dist'),
       filename: '[name].bundle.js',
       publicPath: '/',
-      assetModuleFilename: '[name][ext][query]'
+      assetModuleFilename: '[name][ext][query]',
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, './src/index.html'), // template file
-        filename: 'index.html', // output file
+        template: path.resolve(__dirname, './src/index.html'), // Template file
+        filename: 'index.html', // Output file
       }),
       new CleanWebpackPlugin(),
       new webpack.ProvidePlugin({
@@ -28,7 +27,7 @@ module.exports = (env, config) => {
       }),
       new CopyWebpackPlugin({
         patterns: [
-            { from: 'data', to: 'data', noErrorOnMissing: true }, // Copy `data` folder to `dist/data`
+          { from: 'data', to: 'data', noErrorOnMissing: true }, // Adjust path as needed
         ],
       }),
     ],
@@ -36,67 +35,48 @@ module.exports = (env, config) => {
       rules: [
         {
           test: /\.html$/,
-          use: ['html-loader']
+          use: ['html-loader'],
         },
         {
           test: /\.webmanifest$/,
-          use: [{
-            loader: 'file-loader',
-            options: {
-              name: 'site.webmanifest',
-              outputPath: '/'
-            }
-          }],
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: 'site.webmanifest',
+                outputPath: '/',
+              },
+            },
+          ],
         },
-        // JavaScript
         {
           test: /\.js$/,
           exclude: /node_modules/,
           use: ['babel-loader', 'source-map-loader'],
         },
-        // Images
         {
           test: /\.(?:ico|gif|png|jpg|jpeg|svg)$/i,
           type: 'asset/resource',
         },
-        // Fonts and SVGs
         {
-          test: /\.(woff(2)?|eot|ttf|otf|)$/,
+          test: /\.(woff(2)?|eot|ttf|otf|)$/i,
           type: 'asset/inline',
         },
-        // CSS, PostCSS, and Sass
         {
-          test: /\.(css)$/,
-          use: ['style-loader', 'css-loader']
+          test: /\.(css)$/i,
+          use: ['style-loader', 'css-loader'],
         },
         {
-          test: /\.(scss)$/,
-          use: [{
-            loader: "style-loader",
-          },
-          {
-            loader: "css-loader",
-            options: {
-              importLoaders: 1,
-              modules: {
-                mode: "icss",
-              },
-            },
-          },
-          {
-            loader: "sass-loader",
-          }],
+          test: /\.(scss)$/i,
+          use: ['style-loader', 'css-loader', 'sass-loader'],
         },
       ],
     },
     devServer: {
-      historyApiFallback:{
-          index:'/index.html'
-      },
+      historyApiFallback: true,
       static: {
         directory: path.join(__dirname, 'dist'),
-      },
+      }
     },
-  }
-  
-}
+  };
+};
