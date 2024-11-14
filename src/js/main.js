@@ -1,7 +1,8 @@
 import Dropzone from "dropzone";
 import "dropzone/dist/dropzone.css";
 import "../stylesheets/style.scss";
-import exceljs from "exceljs";
+//import exceljs from "exceljs";
+import exceljs from "exceljs/dist/exceljs.js";
 import { nanoid } from "nanoid";
 
 class SDQC {
