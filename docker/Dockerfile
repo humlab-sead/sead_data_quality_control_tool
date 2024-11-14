@@ -2,7 +2,13 @@ FROM nginx
 
 RUN apt-get update
 
-RUN apt-get install git nano nodejs npm -y
+RUN apt-get install git nano build-essential -y
+
+# Add NodeSource repository for Node.js 22
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+
+# Install Node.js and npm
+RUN apt-get install -y nodejs
 
 WORKDIR /
 
