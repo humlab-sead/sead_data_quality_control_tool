@@ -52,7 +52,35 @@ module.exports = (env, config) => {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          use: ['babel-loader', 'source-map-loader'],
+          use: [
+            'source-map-loader', 
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: [
+                  [
+                    '@babel/preset-env',
+                    {
+                      targets: {
+                        // Conservative browser targets for compatibility
+                        browsers: [
+                          "last 2 versions", // Last 2 versions of all browsers
+                          "ie >= 11", // Support for Internet Explorer 11
+                          "safari >= 9", // Older Safari versions
+                          "> 0.2%", // Browsers with >0.2% market share
+                          "not dead", // Avoid dead browsers (no updates for over 24 months)
+                        ],
+                      },
+                      useBuiltIns: 'entry', // Polyfill features used in your code
+                      corejs: '3.32', // Ensure compatibility with CoreJS 3.x
+                      modules: false, // Don't transpile ES modules (let Webpack handle it)
+                      debug: false, // Set to `true` if you want to log Babel transformations
+                    },
+                  ],
+                ],
+              },
+            },
+          ],
         },
         {
           test: /\.(?:ico|gif|png|jpg|jpeg|svg)$/i,
