@@ -28,7 +28,7 @@ module.exports = (env, config) => {
       }),
       new CopyWebpackPlugin({
         patterns: [
-            { from: 'data', to: 'data' }, // Copy `data` folder to `dist/data`
+            { from: 'data', to: 'data', noErrorOnMissing: true }, // Copy `data` folder to `dist/data`
         ],
       }),
     ],
