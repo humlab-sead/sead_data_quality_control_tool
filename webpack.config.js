@@ -6,6 +6,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = (env, config) => {
   return {
+    mode: 'production',
     entry: {
       main: path.resolve(__dirname, './src/js/main.js'),
     },
@@ -14,6 +15,9 @@ module.exports = (env, config) => {
       filename: '[name].bundle.js',
       publicPath: '/',
       assetModuleFilename: '[name][ext][query]',
+    },
+    optimization: {
+      minimize: true,  // Ensures minification (enabled by default in production mode)
     },
     plugins: [
       new HtmlWebpackPlugin({
