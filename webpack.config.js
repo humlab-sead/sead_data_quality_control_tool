@@ -17,7 +17,7 @@ module.exports = (env, config) => {
       assetModuleFilename: '[name][ext][query]',
     },
     optimization: {
-      minimize: true,  // Ensures minification (enabled by default in production mode)
+      minimize: false,
     },
     plugins: [
       new HtmlWebpackPlugin({
